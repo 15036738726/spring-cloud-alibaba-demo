@@ -1,5 +1,7 @@
 Nacos：Spring Cloud Alibaba服务注册与配置中心   https://c.biancheng.net/springcloud/nacos.html
 
+分支：Branche_Nacos
+
 我们可以将 Nacos 理解成服务注册中心和配置中心的组合体，它可以替换 Eureka 作为服务注册中心，实现服务的注册与发现；还可以替换 Spring Cloud Config 作为配置中心，实现配置的动态刷新
 
 Nacos 两大组件  与 Eureka 类似，Nacos 也采用 CS（Client/Server，客户端/服务器）架构
