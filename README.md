@@ -11,6 +11,8 @@ Nacos 两大组件  与 Eureka 类似，Nacos 也采用 CS（Client/Server，客
 服务消费者（Consumer Service）：它是一个 Nacos Client，用于消费服务。它可以从服务注册中心获取服务列表，调用所需的服务
 
 
+打开命令行窗口，跳转到 Nacos Server 安装目录的 bin 下，执行以下命令，以单机模式启动 Nacos Server
+startup.cmd -m standalone
 
 注册中心：http://localhost:8848/nacos
 
