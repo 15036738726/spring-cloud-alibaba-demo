@@ -5,9 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>spring-cloud-alibaba-provider-8001</module>
-        <module>spring-cloud-alibaba-consumer-nacos-8801</module>
-        <module>spring-cloud-alibaba-config-client-3377</module>
+        <module>spring-cloud-alibaba-sentinel-service-8401</module>
+        <module>spring-cloud-alibaba-provider-mysql-8003</module>
+        <module>spring-cloud-alibaba-consumer-mysql-8803</module>
+        <module>spring-cloud-alibaba-api</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -48,6 +49,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 </project>

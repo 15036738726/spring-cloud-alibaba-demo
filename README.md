@@ -1,31 +1,132 @@
-Nacos：Spring Cloud Alibaba服务注册与配置中心   https://c.biancheng.net/springcloud/nacos.html
+Sentinel：Spring Cloud Alibaba高可用流量控制组件   https://c.biancheng.net/springcloud/sentinel.html
 
-分支：Branche_Nacos
+分支：Branche_Sentinel
 
-我们可以将 Nacos 理解成服务注册中心和配置中心的组合体，它可以替换 Eureka 作为服务注册中心，实现服务的注册与发现；还可以替换 Spring Cloud Config 作为配置中心，实现配置的动态刷新
-
-Nacos 两大组件  与 Eureka 类似，Nacos 也采用 CS（Client/Server，客户端/服务器）架构
-
-服务注册中心（Register Service）：它是一个 Nacos Server，可以为服务提供者和服务消费者提供服务注册和发现功能。
-服务提供者（Provider Service）：它是一个 Nacos Client，用于对外服务。它将自己提供的服务注册到服务注册中心，以供服务消费者发现和调用。
-服务消费者（Consumer Service）：它是一个 Nacos Client，用于消费服务。它可以从服务注册中心获取服务列表，调用所需的服务
+从功能上来说，Sentinel 与 Spring Cloud Netfilx Hystrix 类似，但 Sentinel 要比 Hystrix 更加强大，例如 Sentinel 提供了流量控制功能、比 Hystrix 更加完善的实时监控功能等等
 
 
+Sentinel 的基本概念
 
-注册中心：http://localhost:8848/nacos
+资源	
+资源是 Sentinel 的关键概念。它可以是 Java 应用程序中的任何内容，例如由应用程序提供的服务或者是服务里的方法，甚至可以是一段代码。
+我们可以通过 Sentinel 提供的 API 来定义一个资源，使其能够被 Sentinel 保护起来。通常情况下，我们可以使用方法名、URL 甚至是服务名来作为资源名来描述某个资源。
+
+规则	
+围绕资源而设定的规则。Sentinel 支持流量控制、熔断降级、系统保护、来源访问控制和热点参数等多种规则，所有这些规则都可以动态实时调整。
+
+Sentinel 控制台
+安装 Sentinel 控制台
+打开命令行窗口，跳转到 Sentinel Dashboard  jar 包所在的目录，执行以下命令，启动 Sentinel Dashboard
+java -jar sentinel-dashboard-1.8.2.jar
+
+引入 Sentinel 依赖
 
 
-搭建服务提供者
-http://localhost:8001/dept/nacos/1
+定义资源(为了后续更方便的对资源进行限流操作)
 
-搭建服务消费者
-http://localhost:8801/consumer/dept/nacos/1
+注解方式定义资源（推荐）
+
+Sentinel 流量控制
+
+Sentinel 触发限流时，资源会抛出 BlockException 异常，此时我们可以捕捉 BlockException 来自定义被限流之后的处理逻辑。
+
+通过 Sentinel 控制台定义流控规则
+
+通过代码定义流控规则
 
 
+熔断降级规则
 
-Nacos 配置中心
-${prefix}-${spring.profiles.active}.${file-extension}
-dataId 格式中各参数说明如下：
-${prefix}：默认取值为微服务的服务名，即配置文件中 spring.application.name 的值，我们可以在配置文件中通过配置 spring.cloud.nacos.config.prefix 来指定。
-${spring.profiles.active}：表示当前环境对应的 Profile，例如 dev、test、prod 等。当没有指定环境的 Profile 时，其对应的连接符也将不存在， dataId 的格式变成 ${prefix}.${file-extension}。
-${file-extension}：表示配置内容的数据格式，我们可以在配置文件中通过配置项 spring.cloud.nacos.config.file-extension 来配置，例如 properties 和 yaml。
+Sentinel 熔断策略
+Sentinel 提供了 3 种熔断策略
+
+慢调用比例
+(SLOW_REQUEST_RATIO）
+选择以慢调用比例作为阈值，需要设置允许的慢调用 RT（即最大响应时间），若请求的响应时间大于该值则统计为慢调用。
+当单位统计时长（statIntervalMs）内请求数目大于设置的最小请求数目，且慢调用的比例大于阈值，则接下来的熔断时长内请求会自动被熔断。
+经过熔断时长后熔断器会进入探测恢复状态（HALF-OPEN 状态），若接下来的一个请求响应时间小于设置的慢调用 RT 则结束熔断，若大于设置的慢调用 RT 则再次被熔断。
+
+异常比例 (ERROR_RATIO)
+当单位统计时长（statIntervalMs）内请求数目大于设置的最小请求数目且异常的比例大于阈值，则在接下来的熔断时长内请求会自动被熔断。
+经过熔断时长后熔断器会进入探测恢复状态（HALF-OPEN 状态），若接下来的一个请求成功完成（没有错误）则结束熔断，否则会再次被熔断。异常比率的阈值范围是 [0.0, 1.0]，代表 0% - 100%。
+
+Sentinel 熔断降级中共涉及 3 种状态  跟Hystrix差不多
+
+---------------------------------------------------------------
+熔断关闭状态			处于关闭状态时，请求可以正常调用资源
+（CLOSED
+
+	满足以下任意条件，Sentinel 熔断器进入熔断关闭状态：
+全部请求访问成功。
+单位统计时长（statIntervalMs）内请求数目小于设置的最小请求数目。
+未达到熔断标准，例如服务超时比例、异常数、异常比例未达到阈值。
+处于探测恢复状态时，下一个请求访问成功。
+
+---------------------------------------------------------------
+熔断开启状态			处于熔断开启状态时，熔断器会一定的时间（规定的熔断时长）内，暂时切断所有请求对该资源的调用，并调用相应的降级逻辑使请求快速失败避免系统崩溃
+（OPEN
+
+满足以下任意条件，Sentinel 熔断器进入熔断开启状态：
+单位统计时长内请求数目大于设置的最小请求数目，且已达到熔断标准，例如请求超时比例、异常数、异常比例达到阈值。
+处于探测恢复状态时，下一个请求访问失败。
+---------------------------------------------------------------
+探测恢复状态			处于探测恢复状态时，Sentinel 熔断器会允许一个请求调用资源。则若接下来的一个请求成功完成（没有错误）则结束熔断，
+（HALF-OPEN）			熔断器进入熔断关闭（CLOSED）状态；否则会再次被熔断，熔断器进入熔断开启（OPEN）状态。	
+
+	
+在熔断开启一段时间（降级窗口时间或熔断时长，单位为 s）后，Sentinel 熔断器自动会进入探测恢复状态。
+---------------------------------------------------------------
+
+属性	说明	默认值	使用范围
+资源名	规则的作用对象。	-	所有熔断策略
+熔断策略	Sentinel 支持3 中熔断策略：慢调用比例、异常比例、异常数策略。	慢调用比例	所有熔断策略
+最大 RT	请求的最大相应时间，请求的响应时间大于该值则统计为慢调用。	-	慢调用比例
+熔断时长	熔断开启状态持续的时间，超过该时间熔断器会切换为探测恢复状态（HALF-OPEN），单位为 s。	-	所有熔断策略
+最小请求数	熔断触发的最小请求数，请求数小于该值时即使异常比率超出阈值也不会熔断（1.7.0 引入）。	5	所有熔断策略
+统计时长	熔断触发需要统计的时长（单位为 ms），如 60*1000 代表分钟级（1.8.0 引入）。	1000 ms	所有熔断策略
+比例阈值	分为慢调用比例阈值和异常比例阈值，即慢调用或异常调用占所有请求的百分比，取值范围 [0.0,1.0]。	-	慢调用比例 、异常比例
+异常数	请求或调用发生的异常的数量。	-	异常数
+
+
+Sentinel 实现熔断降级过程
+Sentinel 实现熔断降级的步骤如下：
+在项目中，使用 @SentinelResource 注解的 fallback 属性可以为资源指定熔断降级逻辑（方法）。
+通过 Sentinel 控制台或代码定义熔断规则，包括熔断策略、最小请求数、阈值、熔断时长以及统计时长等。
+若单位统计时长（statIntervalMs）内，请求数目大于设置的最小请求数目且达到熔断标准（例如请求超时比例、异常数、异常比例达到阈值），Sentinel 熔断器进入熔断开启状态（OPEN）。
+处于熔断开启状态时， @SentinelResource 注解的 fallback 属性指定的降级逻辑会临时充当主业务逻辑，而原来的主逻辑则暂时不可用。当有请求访问该资源时，会直接调用降级逻辑使请求快速失败，而不会调用原来的主业务逻辑。
+在经过一段时间（在熔断规则中设置的熔断时长）后，熔断器会进入探测恢复状态（HALF-OPEN），此时 Sentinel 会允许一个请求对原来的主业务逻辑进行调用，并监控其调用结果。
+若请求调用成功，则熔断器进入熔断关闭状态（CLOSED ），服务原来的主业务逻辑恢复，否则重新进入熔断开启状态（OPEN）。
+
+
+通过 Sentinel 控制台定义熔断降级规则
+
+设置（不然测试不出来）：
+异常数为 1；
+统计时长为 2000 ms（即 1s）；
+最小请求数为 1；
+熔断时长为 5 秒；
+
+通过代码定义熔断规则
+
+/**
+ * 初始化熔断策略
+ */
+private static void initDegradeRule() {
+    List<DegradeRule> rules = new ArrayList<>();
+    DegradeRule rule = new DegradeRule("fallback");
+    //熔断策略为异常比例
+    rule.setGrade(CircuitBreakerStrategy.ERROR_RATIO.getType());
+    //异常比例阈值
+    rule.setCount(0.7);
+    //最小请求数
+    rule.setMinRequestAmount(100);
+    //统计市场，单位毫秒
+    rule.setStatIntervalMs(30000);
+    //熔断市场，单位秒
+    rule.setTimeWindow(10);
+    rules.add(rule);
+    DegradeRuleManager.loadRules(rules);
+}
+
+在需要监控的方法首行调用这个规则就行（可视化配置是对 @SentinelResource(value = "fallback" 所标记的方法配置规则，通过可视化平台，对fallback资源配置规则）
+
