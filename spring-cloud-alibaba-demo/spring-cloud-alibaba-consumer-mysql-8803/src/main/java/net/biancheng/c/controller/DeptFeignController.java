@@ -51,7 +51,7 @@ public class DeptFeignController {
         return deptFeignService.list();
     }
 
-    //处理异常的回退方法（服务降级）
+    // 处理异常的回退方法（服务降级）
     public CommonResult handlerFallback(@PathVariable int id, Throwable e) {
         System.err.println("--------->>>>服务降级逻辑");
         Dept dept = new Dept(id, "null", "null");
