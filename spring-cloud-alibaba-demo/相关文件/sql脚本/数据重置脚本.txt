@@ -1,0 +1,18 @@
+select * from seata.global_table gt ;
+select * from seata.branch_table bt ;
+select * from seata.lock_table lt ;
+select * from seata.undo_log ul ;
+
+select * from seata_order.t_order;
+select * from seata_storage.t_storage;
+select * from seata_account.t_account;
+
+
+##重置订单表
+delete from seata_order.t_order where user_id =1;
+
+##重置库存表
+update seata_storage.t_storage set used=0,residue =100 where id=1;
+
+##重置账户表
+update seata_account.t_account set used=0,residue =1000 where id=1;

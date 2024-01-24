@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: spring-cloud-alibaba-seata-storage-8006
+
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    name: defaultDataSource
+    url: jdbc:mysql://localhost:3306/seata_storage?serverTimezone=UTC
+    username: root
+    password: 123456
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username:
+        password:
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080 #sentinel控制台地址
+        port: 8719 #sentinel默认端口
+
+    alibaba:
+      seata:
+        tx-service-group: service-storage-group
+
+server:
+  port: 8006
+seata:
+  application-id: ${spring.application.name}
+  tx-service-group: service-storage-group
+
+  service:
+    grouplist:
+      seata-server: 127.0.0.1:8091 #seata默认端口
+
+  registry:
+    type: nacos
+    nacos:
+      server-addr: 127.0.0.1:8848
+
+  config:
+    type: nacos
+    nacos:
+      server-addr: 127.0.0.1:8848
+
+feign:
+  sentinel:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+###################################### MyBatis 配置 ######################################
+mybatis:
+  # 指定 mapper.xml 的位置
+  mapper-locations: classpath:mapper/*.xml
+  #扫描实体类的位置,在此处指明扫描实体类的包，在 mapper.xml 中就可以不写实体类的全路径名
+  type-aliases-package: net.biancheng.c.entity
+  configuration:
+    #默认开启驼峰命名法，可以不用设置该属性
+    map-underscore-to-camel-case: true

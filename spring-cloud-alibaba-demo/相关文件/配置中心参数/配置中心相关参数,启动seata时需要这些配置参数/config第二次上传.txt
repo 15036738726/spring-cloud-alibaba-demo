@@ -1,0 +1,14 @@
+#将 Seata Server 的存储模式修改为 db
+store.mode=db
+# 数据库驱动
+store.db.driverClassName=com.mysql.cj.jdbc.Driver
+# 数据库 url
+store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useSSL=false&characterEncoding=UTF-8&useUnicode=true&serverTimezone=UTC 
+# 数据库的用户名
+store.db.user=root 
+# 数据库的密码
+store.db.password=123456
+# 自定义事务分组
+service.vgroupMapping.service-order-group=default 
+service.vgroupMapping.service-storage-group=default
+service.vgroupMapping.service-account-group=default
